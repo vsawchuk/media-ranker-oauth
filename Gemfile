@@ -39,6 +39,10 @@ gem 'jbuilder', '~> 2.5'
 # Use the Foundation CSS framework
 gem 'foundation-rails'
 
+# OmniAuth for OAuth
+gem "omniauth"
+gem "omniauth-github"
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platform: :mri
@@ -70,6 +74,7 @@ group :development do
   # https://github.com/Springest/terminal-notifier-guard
   gem 'terminal-notifier-guard', '~> 1.6.2'
   gem 'terminal-notifier', '~> 1.6.2'
+  gem 'dotenv-rails'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem

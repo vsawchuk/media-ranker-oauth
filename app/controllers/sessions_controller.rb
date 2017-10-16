@@ -31,4 +31,9 @@ class SessionsController < ApplicationController
     flash[:result_text] = "Successfully logged out"
     redirect_to root_path
   end
+
+  def create
+    auth_hash = request.env['omniauth.auth']
+    raise
+  end
 end
