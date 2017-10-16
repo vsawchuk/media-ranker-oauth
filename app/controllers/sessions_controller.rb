@@ -1,4 +1,6 @@
 class SessionsController < ApplicationController
+  skip_before_filter :determine_access, only: [:create]
+
   def login_form
   end
 
@@ -39,19 +41,22 @@ class SessionsController < ApplicationController
       user = User.find_by(uid: auth_hash[:uid], provider: 'github')
       if user.nil?
         user = User.new(uid: auth_hash[:uid], provider: auth_hash[:provider], username: auth_hash[:info][:nickname], email: auth_hash[:info][:email])
-        # user = User.build_from_github(auth_hash)
         if user.save
-          flash[:success] = "Welcome #{user.username}"
+          flash[:status] = :success
+          flash[:result_text] = "Welcome #{user.username}"
         else
-          flash[:error] = "Unable to save user"
+          flash[:status] = :failure
+          flash[:result_text] = "Unable to save user"
         end
       else
-        flash[:success] = "Logged in successfully"
+        flash[:status] = :success
+        flash[:result_text] = "Logged in successfully"
       end
       session[:user_id] = user.id
       redirect_to root_path
     else
-      flash[:error] = "Could not log in"
+      flash[:status] = :failure
+      flash[:result_text] = "Could not log in"
       redirect_to root_path
     end
   end
