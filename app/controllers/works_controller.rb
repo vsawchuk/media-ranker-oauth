@@ -2,6 +2,8 @@ class WorksController < ApplicationController
   # We should always be able to tell what category
   # of work we're dealing with
   before_action :category_from_work, except: [:root, :index, :new, :create]
+  before_action :user_owns_work, only: [:show, :edit, :update, :destroy]
+  before_action :user_can_access_work, only: [:edit, :update, :destroy]
   skip_before_filter :determine_access, only: [:root]
 
   def root
@@ -91,12 +93,27 @@ class WorksController < ApplicationController
 
 private
   def media_params
-    params.require(:work).permit(:title, :category, :creator, :description, :publication_year)
+    params.require(:work).permit(:title, :category, :creator, :description, :publication_year).merge(user_id: @login_user.id.to_i)
   end
 
   def category_from_work
     @work = Work.find_by(id: params[:id])
     render_404 unless @work
     @media_category = @work.category.downcase.pluralize
+  end
+
+  def user_owns_work
+    @user_owns_work = false
+    if @login_user
+      @user_owns_work = (@login_user.id.to_i == @work.user_id.to_i)
+    end
+  end
+
+  def user_can_access_work
+    unless @user_owns_work
+      flash[:status] = :failure
+      flash[:result_text] = "You must own a work to do that"
+      redirect_back(fallback_location: root_path)
+    end
   end
 end

@@ -5,9 +5,13 @@
   <p><%= @work.description %></p>
   <section>
     <%= link_to "Back to media ranks", root_path, class: "button" %>
-    <%= link_to "Edit", edit_work_path(@work), class: "button" %>
+    <% if @user_owns_work %>
+      <%= link_to "Edit", edit_work_path(@work), class: "button" %>
+    <% end %>
     <%= link_to "Upvote", upvote_path(@work), class: "button", method: :post %>
-    <%= link_to "Delete", work_path(@work), class: "alert button", method: "delete", data: { confirm: "Are you sure?" } %>
+    <% if @user_owns_work %>
+      <%= link_to "Delete", work_path(@work), class: "alert button", method: "delete", data: { confirm: "Are you sure?" } %>
+    <% end %>
   </section>
 </article>
 
