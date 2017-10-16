@@ -42,6 +42,7 @@ gem 'foundation-rails'
 # OmniAuth for OAuth
 gem "omniauth"
 gem "omniauth-github"
+gem 'omniauth-google-oauth2'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
@@ -75,6 +76,7 @@ group :development do
   gem 'terminal-notifier-guard', '~> 1.6.2'
   gem 'terminal-notifier', '~> 1.6.2'
   gem 'dotenv-rails'
+  gem 'awesome_print'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
