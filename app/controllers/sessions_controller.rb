@@ -9,6 +9,11 @@ class SessionsController < ApplicationController
   end
 
   def login_form
+    if @login_user
+      flash[:status] = :failure
+      flash[:result_text] = "You are already logged in"
+      redirect_back(fallback_location: root_path)
+    end
   end
 
   def create
