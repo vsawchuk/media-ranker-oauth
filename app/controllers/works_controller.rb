@@ -4,7 +4,7 @@ class WorksController < ApplicationController
   before_action :category_from_work, except: [:root, :index, :new, :create]
   before_action :user_owns_work, only: [:show, :edit, :update, :destroy]
   before_action :user_can_access_work, only: [:edit, :update, :destroy]
-  skip_before_filter :determine_access, only: [:root]
+  skip_before_action :determine_access, only: [:root]
 
   def root
     @albums = Work.best_albums

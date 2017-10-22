@@ -1,5 +1,5 @@
 class SessionsController < ApplicationController
-  skip_before_filter :determine_access, only: [:create, :login_form]
+  skip_before_action :determine_access, only: [:create, :login_form]
 
   def logout
     session[:user_id] = nil

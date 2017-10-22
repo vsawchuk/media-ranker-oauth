@@ -9,44 +9,44 @@ describe SessionsController do
     end
   end
 
-  describe "login" do
-    # This functionality is complex!
-    # There are definitely interesting cases I haven't covered
-    # here, but these are the cases I could think of that are
-    # likely to occur. More test cases will be added as bugs
-    # are uncovered.
-    #
-    # Note also: some more behavior is covered in the upvote tests
-    # under the works controller, since that's the only place
-    # where there's an interesting difference between a logged-in
-    # and not-logged-in user.
-    it "succeeds for a new user" do
-      username = "test_user"
-      # Precondition: no user with this username exists
-      User.find_by(username: username).must_be_nil
+  describe "oauth" do
+    let(:user) {users(:dan)}
+    let(:other_user) {users(:kari)}
 
-      post login_path, params: { username: username }
+    it "creates a new user successfully" do
+      new_user = User.new(username: "new user", email: "newuser@test.com", uid: 5, provider: "github")
+      # Precondition: no user with this username exists
+      User.find_by(username: new_user.username).must_be_nil
+      proc{log_in(new_user, :github)}.must_change 'User.count', +1
+      flash[:status].must_equal :success
+      flash[:result_text].must_equal "Welcome #{new_user.username}"
       must_redirect_to root_path
     end
 
     it "succeeds for a returning user" do
-      username = User.first.username
-      post login_path, params: { username: username }
+      proc{log_in(user, user.provider.to_sym)}.must_change 'User.count', 0
+      flash[:status].must_equal :success
+      flash[:result_text].must_equal "Logged in successfully"
       must_redirect_to root_path
     end
 
-    it "renders 400 bad_request if the username is blank" do
-      post login_path, params: { username: "" }
-      must_respond_with :bad_request
+    it "returns error message if the username is blank" do
+      invalid_user = User.new(username: "", email: "newuser@test.com", uid: 5, provider: "github")
+      log_in(invalid_user, invalid_user.provider.to_sym)
+      must_respond_with :redirect
+      flash[:status].must_equal :failure
+      flash[:result_text].must_equal "Unable to save user"
     end
 
     it "succeeds if a different user is already logged in" do
-      username = "user_1"
-      post login_path, params: { username: username }
+      log_in(user, user.provider.to_sym)
+      flash[:status].must_equal :success
+      flash[:result_text].must_equal "Logged in successfully"
       must_redirect_to root_path
 
-      username = "user_2"
-      post login_path, params: { username: username }
+      log_in(other_user, other_user.provider.to_sym)
+      flash[:status].must_equal :success
+      flash[:result_text].must_equal "Logged in successfully"
       must_redirect_to root_path
     end
   end
@@ -54,16 +54,20 @@ describe SessionsController do
   describe "logout" do
     it "succeeds if the user is logged in" do
       # Gotta be logged in first
-      post login_path, params: { username: "test user" }
+      user = users(:dan)
+      log_in(user, user.provider.to_sym)
+      flash[:result_text].must_equal "Logged in successfully"
       must_redirect_to root_path
 
       post logout_path
       must_redirect_to root_path
+      session[:user_id].must_equal nil
     end
 
     it "succeeds if the user is not logged in" do
       post logout_path
       must_redirect_to root_path
+      session[:user_id].must_equal nil
     end
   end
 end

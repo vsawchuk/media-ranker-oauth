@@ -2,6 +2,12 @@
 
 dan:
   username: dan
+  email: dan@email.com
+  uid: 1
+  provider: "github"
 
 kari:
   username: kari
+  email: kari@email.com
+  uid: 2
+  provider: "google_oauth2"
