@@ -36,6 +36,10 @@ describe WorksController do
   INVALID_CATEGORIES = ["nope", "42", "", "  ", "albumstrailingtext"]
 
   describe "index" do
+    before do
+      user = users(:dan)
+      log_in(user, user.provider.to_sym)
+    end
     it "succeeds when there are works" do
       Work.count.must_be :>, 0, "No works in the test fixtures"
       get works_path
@@ -51,12 +55,17 @@ describe WorksController do
 
   describe "new" do
     it "works" do
+      log_in(users(:dan), users(:dan).provider.to_sym)
       get new_work_path
       must_respond_with :success
     end
   end
 
   describe "create" do
+    before do
+      user = users(:dan)
+      log_in(user, user.provider.to_sym)
+    end
     it "creates a work with valid data for a real category" do
       work_data = {
         work: {
@@ -113,6 +122,10 @@ describe WorksController do
   end
 
   describe "show" do
+    before do
+      user = users(:dan)
+      log_in(user, user.provider.to_sym)
+    end
     it "succeeds for an extant work ID" do
       get work_path(Work.first)
       must_respond_with :success
@@ -126,6 +139,10 @@ describe WorksController do
   end
 
   describe "edit" do
+    before do
+      user = users(:dan)
+      log_in(user, user.provider.to_sym)
+    end
     it "succeeds for an extant work ID" do
       get edit_work_path(Work.first)
       must_respond_with :success
@@ -139,6 +156,10 @@ describe WorksController do
   end
 
   describe "update" do
+    before do
+      user = users(:dan)
+      log_in(user, user.provider.to_sym)
+    end
     it "succeeds for valid data and an extant work ID" do
       work = Work.first
       work_data = {
@@ -178,6 +199,8 @@ describe WorksController do
 
   describe "destroy" do
     it "succeeds for an extant work ID" do
+      user = users(:dan)
+      log_in(user, user.provider.to_sym)
       work_id = Work.first.id
 
       delete work_path(work_id)
@@ -188,6 +211,8 @@ describe WorksController do
     end
 
     it "renders 404 not_found and does not update the DB for a bogus work ID" do
+      user = users(:dan)
+      log_in(user, user.provider.to_sym)
       start_count = Work.count
 
       bogus_work_id = Work.last.id + 1
@@ -199,11 +224,11 @@ describe WorksController do
   end
 
   describe "upvote" do
-    let(:user) { User.create!(username: "test_user") }
-    let(:work) { Work.first }
+    let(:user) { users(:dan) }
+    let(:work) { Work.create(title: "A new work", creator: "Someone", publication_year: 2010, category: "album", user_id: user.id) }
 
     def login
-      post login_path, params: { username: user.username }
+      log_in(user, user.provider.to_sym)
       must_respond_with :redirect
     end
 
@@ -212,23 +237,27 @@ describe WorksController do
       must_respond_with :redirect
     end
 
-    it "returns 401 unauthorized if no user is logged in" do
+    it "redirects to root path if no user is logged in" do
       start_vote_count = work.votes.count
 
       post upvote_path(work)
-      must_respond_with :unauthorized
+      must_respond_with :redirect
+      must_redirect_to root_path
+      flash[:result_text].must_equal "Please login first"
 
       work.votes.count.must_equal start_vote_count
     end
 
-    it "returns 401 unauthorized after the user has logged out" do
+    it "redirects to root path after the user has logged out" do
       start_vote_count = work.votes.count
 
       login
       logout
 
       post upvote_path(work)
-      must_respond_with :unauthorized
+      must_respond_with :redirect
+      must_redirect_to root_path
+      flash[:result_text].must_equal "Please login first"
 
       work.votes.count.must_equal start_vote_count
     end
