@@ -122,16 +122,16 @@ describe WorksController do
   end
 
   describe "show" do
-    before do
+    it "succeeds for an extant work ID" do
       user = users(:dan)
       log_in(user, user.provider.to_sym)
-    end
-    it "succeeds for an extant work ID" do
       get work_path(Work.first)
       must_respond_with :success
     end
 
     it "renders 404 not_found for a bogus work ID" do
+      user = users(:dan)
+      log_in(user, user.provider.to_sym)
       bogus_work_id = Work.last.id + 1
       get work_path(bogus_work_id)
       must_respond_with :not_found
